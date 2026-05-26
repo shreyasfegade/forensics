@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Local Environment / Testing Outputs
+test_photo.jpg
+test_hidden.jpg
+test_clean.png
+test_document.pdf
+test_renamed.txt
+
+# OS Junk
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# IDEs
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# AI Specs & Command Codes
+.commandcode/
+.ai-docs/
+.env
+
+# Python / Venv
+__pycache__/
+.venv/
+*.pyc
