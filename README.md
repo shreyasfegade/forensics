@@ -1,101 +1,41 @@
 # Forensics
 
-**Drop any file to instantly reveal hidden metadata, EXIF tags, GPS leaks, and steganography markers.** Zero uploads — everything runs locally in your browser.
+**See what your files are hiding.** Drop any file to instantly expose hidden EXIF metadata, GPS leaks, true file type, byte-level entropy, embedded strings, and steganography — a full forensic report in milliseconds. Zero uploads, zero dependencies, everything runs in your browser.
 
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
-![Leaflet](https://img.shields.io/badge/Leaflet-199900?style=flat-square&logo=leaflet&logoColor=white)
+![Dependencies](https://img.shields.io/badge/Dependencies-0-30D158?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-![Forensics Hex Grid](screenshots/detail.png)
+![Forensics Hero](screenshots/hero.png)
 
 ---
 
-## The Problem
+## Why
 
-Every digital asset carries silent data. A camera photo contains GPS coordinates of where it was shot, a document lists corporate authors and software version trees, and malicious binaries can mask themselves as harmless text files. Analyzing these files usually requires uploading them to online checkers (risking data privacy) or installing complex command-line utility suites (like ExifTool).
+Every file carries silent data. A vacation photo embeds the GPS coordinates of your house, a PDF leaks the author's full name and OS version, and a renamed executable slips past anyone who trusts the file extension. Inspecting this usually means uploading to an online checker (compromising the very privacy you're trying to protect) or installing heavyweight CLI tools like ExifTool.
 
-## The Solution
-
-**Forensics** provides instant client-side file inspection. Utilizing the browser File API, `ArrayBuffer`, and direct `DataView` binary stream parsing, it decodes camera metadata, maps GPS offsets, computes Shannon entropy, and exposes hidden appended payloads—all running completely in sandboxed browser memory. No data ever leaves your computer.
+**Forensics** does it in the browser. Nothing is uploaded. Nothing is installed. Drop a file and get a full forensic breakdown before you can blink.
 
 ---
 
 ## Features
 
-- **Binary Signature Detector** — Scans the first 8-16 bytes (magic bytes) against a database of signatures to determine the true file type, warning of extension mismatches (e.g., an executable renamed to a `.txt` file).
-- **Hand-Rolled EXIF Parser** — Recursively parses JPEG APP1 and PNG `eXIf` segments, decoding TIFF byte ordering (endianness), IFD pointers, and GPS rational numbers without external libraries.
-- **GPS Mapping Layer** — Resolves coordinate data from EXIF properties and plots the exact photo location on a Leaflet-powered dark mode map.
-- **Shannon Entropy Analysis** — Computes raw byte-frequency entropy across the file and renders a real-time, interactive 256-bar canvas chart.
-- **Steganography Detector** — Scans for hidden bytes appended after the official End-of-File (EOF) marker (e.g., JPEG `0xFFD9`, PNG `IEND`).
-- **Interactive Hex Grid** — Renders the first 256 bytes of any file as a color-coded hex cell matrix with ASCII characters and category hover highlights (Null, Control, ASCII, Other).
-- **Sound Feedback Engine** — Integrates synthesized haptic chime sweeps using the Web Audio API to alert on analysis complete, warning, or reset.
-- **Sandbox Demo Mode** — Built-in mock binary generators to demonstrate camera EXIF leaks, renamed executables, and confidential PDFs in one click.
-
----
-
-## Tech Stack
-
-- **HTML5 Canvas & Layout**: Clean, structured HTML structure with responsive Glassmorphic styling.
-- **Interactions & Core Logic**: Pure vanilla ES6 JavaScript (hand-rolled binary parsing, array buffers, audio synthesis).
-- **Animations**: GSAP (GreenSock Animation Platform) for smooth transitions and scan effects.
-- **Map Renderer**: Leaflet.js (configured with an inverted dark tiles filter).
-- **Build Tooling**: Zero-build. Server runs on any static file server (e.g., Node `http-server` or Python `http.server`).
-
----
-
-## Quick Start
-
-### Installation & Run
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/shreyasfegade/forensics.git
-   cd forensics
-   ```
-
-2. **Launch a local server:**
-   
-   If you have Python installed:
-   ```bash
-   python -m http.server 3000
-   ```
-   
-   Or if you have Node.js:
-   ```bash
-   npx http-server -p 3000
-   ```
-
-3. **Access the tool:**
-   Open [http://localhost:3000](http://localhost:3000) in your browser.
-
----
-
-## Project Structure
-
-```text
-forensics/
-├── css/
-│   └── styles.css        # Styles, animations, glassmorphism layout
-├── js/
-│   └── app.js            # Binary parsers, Web Audio synthesis, UI interactions
-├── index.html            # Main markup and script imports
-├── package.json          # Dependency configurations for development
-├── LICENSE               # MIT License
-├── .gitignore            # Git exclusions
-└── screenshots/          # Portfolio screenshots
-```
-
----
-
-## Current Status
-
-This project is a **fully functional client-side utility**.
-
-- **Implemented**: True type checking, custom EXIF/TIFF parsing, PDF metadata extraction, Shannon entropy canvas drawing, steganography marker checks, hex grid visualization, audio feedback, and dark-mode mapping.
-- **In Progress**: Local HEIF/HEIC metadata extraction support.
-- **Planned**: Batch file analysis and exportable forensic reports (PDF format).
+| Capability | What it does |
+|---|---|
+| **Hand-rolled EXIF/TIFF parser** | Walks JPEG APP1 and PNG eXIf segments — decodes IFD directories, endianness, GPS rational pairs, camera make/model, lens, software, and timestamps. No library involved. |
+| **GPS location mapping** | Extracts embedded coordinates and plots them on a hand-rolled canvas slippy map with OSM tiles, dark-mode filter, animated crosshair overlay, pulsing range rings, and radar sweep. Privacy-first: tiles load only after explicit opt-in. |
+| **Magic-byte file identification** | Matches the first 4–16 bytes against 30+ known signatures. Flags extension mismatches — catches a `.txt` that's actually an `.exe`. |
+| **Shannon entropy analysis** | Computes bits-per-byte across the full file and renders a 256-bar canvas frequency chart. Near 0 = structured text, near 8 = encrypted or compressed. |
+| **Steganography detection** | Scans past the official EOF marker (JPEG `FFD9`, PNG `IEND`) to find appended hidden payloads. |
+| **PDF metadata extraction** | Pulls author, title, creator, producer, dates, page count, and flags embedded JavaScript. |
+| **ASCII strings extractor** | Scans raw bytes for printable runs and flags URLs, email addresses, file paths, and credential-like patterns. |
+| **Risk verdict engine** | Synthesizes all findings into a Clear / Caution / Exposed verdict with specific, plain-English explanations. |
+| **JSON report export** | One-click download of the full structured forensic report, or copy to clipboard. |
+| **Image preview** | Canvas-rendered thumbnail with resolution and color-depth stats for supported image formats. |
+| **Sound feedback** | Web Audio API chime synthesis for scan progress, warnings, and completion. |
+| **5 instant demos** | GPS photo, disguised executable, leaky PDF, hidden payload, and clean image — try everything without a file on hand. |
 
 ---
 
@@ -103,70 +43,102 @@ This project is a **fully functional client-side utility**.
 
 ```
 ┌─────────────────┐         ┌─────────────────┐         ┌─────────────────┐
-│   FILE INPUT    │         │    ANALYSIS     │         │   RENDERING     │
-│                 │         │                 │         │                 │
-│ • Drag & Drop   │────────►│ • True Type ID  │────────►│ • Results Grid  │
-│ • FileReader    │  Array  │ • EXIF Parser   │ parsed  │ • Canvas Chart  │
-│ • ArrayBuffer   │  Buffer │ • Shannon H(X)  │ data    │ • Hex Editor    │
-│                 │         │ • EOF Stego     │         │ • Leaflet Map   │
+│   FILE INPUT    │         │    ANALYSIS      │         │   RENDERING     │
+│                 │         │                  │         │                 │
+│ Drag & Drop     │────────►│ Magic-byte ID    │────────►│ Verdict card    │
+│ File picker     │ Array   │ EXIF/TIFF parser │ parsed  │ Stats grid      │
+│ Demo generators │ Buffer  │ PDF metadata     │  data   │ Canvas entropy  │
+│                 │         │ Shannon H(X)     │         │ Canvas map      │
+│                 │         │ EOF stego scan   │         │ Strings table   │
+│                 │         │ String extractor  │         │ JSON export     │
+│                 │         │ Verdict engine   │         │ Image preview   │
 └─────────────────┘         └─────────────────┘         └─────────────────┘
 
-                        ⬤ Entirely client-side — zero uploads, zero servers
+                    ⬤ Entirely client-side — zero uploads, zero servers
 ```
 
-### Data Flow
+### Data flow
 
 ```
-1. File dropped onto page
-   ↓
-2. ArrayBuffer loaded ─────────────────── ~50ms (FileReader API)
-   ↓
-3. True type verified ─────────────────── ~5ms (magic byte comparison)
-   ↓
-4. EXIF/metadata parsed ───────────────── ~30ms (binary IFD traversal)
-   ↓
-5. Entropy computed ───────────────────── ~80ms (256-byte frequency distribution)
-   ↓
-6. Steganography checked ──────────────── ~20ms (EOF marker vs file size)
-   ↓
-7. Results rendered ───────────────────── ~15ms (grid + canvas + hex + map)
+File dropped / demo clicked
+  ↓
+ArrayBuffer loaded ────────────── FileReader API
+  ↓
+True type identified ──────────── magic-byte comparison (30+ signatures)
+  ↓
+EXIF/TIFF parsed ──────────────── binary IFD traversal, GPS rational decode
+  ↓
+PDF metadata extracted ────────── text-based /Info dictionary parser
+  ↓
+Entropy computed ──────────────── 256-bin byte frequency → Shannon formula
+  ↓
+Strings extracted ─────────────── printable ASCII scan → URL/email/cred flagging
+  ↓
+Steganography checked ─────────── EOF marker offset vs total file size
+  ↓
+Verdict synthesized ───────────── all findings → risk level + explanations
+  ↓
+Report rendered ───────────────── cards, charts, map, export
 
-Total: ~200ms from drop to full forensic report
+Total: ~200ms from drop to full report
 ```
 
-The EXIF parser walks TIFF IFD directories, determines byte order (Big/Little Endian), and maps tag IDs (`0x0110` for camera model, `0x8825` for GPS) to human-readable values. GPS coordinates are decoded from rational pairs into decimal degrees and plotted on a dark-themed Leaflet.js map.
+The EXIF parser determines byte order from the TIFF header (`II` or `MM`), walks IFD entry chains, and maps tag IDs to human-readable fields. GPS coordinates are decoded from rational number triples (degrees/minutes/seconds) into decimal degrees. Entropy uses Shannon's formula — values near 0 indicate structured data, values near 8 indicate encrypted or compressed content.
 
-Entropy is computed via Shannon's formula: values near 0 indicate structured data (text), values near 8 indicate high randomness (encrypted/compressed). Steganography detection compares the file's EOF marker offset to total file size — excess bytes indicate hidden payloads.
+---
+
+## Tech stack
+
+**Zero runtime dependencies.** Everything is hand-rolled vanilla JavaScript:
+
+- Binary parsing via `ArrayBuffer` + `DataView`
+- Canvas rendering for entropy chart, image preview, and slippy map
+- CSS-only card entrance animations (no animation library)
+- Web Audio API for synthesized sound feedback
+- System font stack (no external font loading)
+- CSP headers lock the page to its own origin (only exception: optional OSM map tiles)
+
+---
+
+## Quick start
+
+```bash
+git clone https://github.com/shreyasfegade/forensics.git
+cd forensics
+npx serve
+```
+
+Open [http://localhost:3000](http://localhost:3000). That's it — no install, no build step.
+
+Or deploy to Vercel: import the repo and it works with zero configuration.
+
+---
+
+## Project structure
+
+```
+forensics/
+├── css/
+│   └── styles.css      # Layout, glassmorphism, card animations, responsive
+├── js/
+│   └── app.js          # All parsers, map, chart, tween engine, UI logic
+├── index.html          # Markup — hero, drop zone, demos, results shell
+├── vercel.json         # Zero-config deploy + CSP/security headers
+├── package.json        # Metadata only — no runtime dependencies
+├── screenshots/        # Portfolio screenshots
+└── LICENSE             # MIT
+```
 
 ---
 
 ## Limitations
 
-- **Browser Memory Boundaries**: Large files (>100MB) can cause tab memory pressure since files are buffered into browser RAM as `ArrayBuffer` objects.
-- **Static Formats**: EXIF extraction is optimized for JPEG and PNG formats.
-- **No Persistence**: Client-side execution means analysis history is lost on page refresh.
-
----
-
-## What This Project Taught Me
-
-- How binary file structures work: `ArrayBuffer`, `DataView`, endianness conversion, and TIFF directory layouts.
-- How Shannon Entropy quantifies randomness in digital data and why it matters for security analysis.
-- The Web Audio API for synthesizing custom audio tones and chime sequences.
-- CSS filter compositing tricks for adapting open-source mapping libraries to dark themes.
-
-## Development Note
-
-**Built with AI-assisted development.** I directed the product vision, designed the analysis pipeline, and made the architecture decisions. AI tools accelerated the implementation.
-
-My contributions:
-- The core idea: a 100% private, zero-upload forensic analysis utility that runs entirely in the browser.
-- Architecture: structuring the file split from a monolithic HTML file into modular CSS and JS modules.
-- The glassmorphic design system and particle effects backdrop.
-- Defining the analysis pipeline: what metadata to extract, how to visualize entropy, and steganography detection logic.
+- **Browser memory**: very large files (100MB+) may cause tab memory pressure since the full `ArrayBuffer` lives in RAM.
+- **EXIF coverage**: optimized for JPEG and PNG. HEIF/HEIC and TIFF-container RAW formats are not yet supported.
+- **No persistence**: analysis is ephemeral — results are lost on refresh (by design, for privacy).
 
 ---
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE).
