@@ -1,25 +1,26 @@
 {
   "name": "forensics",
-  "version": "1.0.0",
-  "description": "A browser-based client-side file intelligence and forensics tool.",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Client-side file forensics — hand-rolled EXIF/TIFF parsing, Shannon-entropy analysis, and steganography detection that runs entirely in the browser. Zero uploads, zero dependencies.",
   "main": "index.html",
   "scripts": {
-    "start": "http-server -p 3000",
-    "dev": "http-server -p 3000 -c-1"
-  },
-  "devDependencies": {
-    "http-server": "^14.1.1"
+    "dev": "npx --yes serve@latest -l 3000 .",
+    "start": "npx --yes serve@latest -l 3000 ."
   },
   "keywords": [
     "forensics",
     "metadata",
     "exif",
+    "tiff-parser",
     "pdf-metadata",
     "shannon-entropy",
-    "leaflet",
+    "steganography",
     "canvas",
     "client-side",
-    "privacy"
+    "privacy",
+    "vanilla-js",
+    "zero-dependencies"
   ],
   "author": "Shreyas Fegade",
   "license": "MIT"

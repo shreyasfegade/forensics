@@ -1,15 +1,14 @@
 # Dependencies
 node_modules/
-package-lock.json
 
-# Local Environment / Testing Outputs
-test_photo.jpg
-test_hidden.jpg
-test_clean.png
-test_document.pdf
-test_renamed.txt
+# Local sample / scratch files (the app ships with in-code demos instead)
+test_*.jpg
+test_*.png
+test_*.pdf
+test_*.txt
+scratch/
 
-# OS Junk
+# OS junk
 .DS_Store
 .DS_Store?
 ._*
@@ -19,7 +18,7 @@ ehthumbs.db
 Thumbs.db
 Desktop.ini
 
-# IDEs
+# Editors / IDEs
 .idea/
 .vscode/
 *.suo
@@ -28,12 +27,28 @@ Desktop.ini
 *.sln
 *.sw?
 
-# AI Specs & Command Codes
+# Environment / secrets
+.env
+.env.*
+
+# Deploy
+.vercel/
+
+# AI tooling scaffolding — never commit any of this
+.claude/
+.claudecode/
 .commandcode/
 .ai-docs/
-.env
+.aider*
+.cursor/
+.cursorrules
+.cursorignore
+.github/copilot-instructions.md
+CLAUDE.md
+AGENTS.md
+.continue/
+.windsurf/
 
-# Python / Venv
-__pycache__/
-.venv/
-*.pyc
+# Logs
+*.log
+npm-debug.log*
