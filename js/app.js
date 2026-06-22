@@ -45,7 +45,11 @@
   function countUp(el, target, { decimals = 0, suffix = '', duration = 750 } = {}) {
     tween({ duration, ease: Ease.outQuart, onUpdate: e => {
       const v = target * e;
-      el.textContent = v.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + suffix;
+      if (decimals > 0) {
+        el.textContent = v.toFixed(decimals) + suffix;
+      } else {
+        el.textContent = Math.round(v).toLocaleString() + suffix;
+      }
     }});
   }
 
@@ -1527,41 +1531,116 @@
   // DEMO SAMPLE GENERATORS (in-code, instant, no assets)
   // ====================================================
   function createMockPhoto(extraTail) {
-    const parts = [
-      0xFF, 0xD8,
-      0xFF, 0xE1, 0x00, 0x94,
-      0x45, 0x78, 0x69, 0x66, 0x00, 0x00,
-      0x49, 0x49, 0x2A, 0x00,
-      0x08, 0x00, 0x00, 0x00,
-      0x03, 0x00,
-      0x0F, 0x01, 0x02, 0x00, 0x06, 0x00, 0x00, 0x00, 0x30, 0x00, 0x00, 0x00,
-      0x10, 0x01, 0x02, 0x00, 0x0E, 0x00, 0x00, 0x00, 0x36, 0x00, 0x00, 0x00,
-      0x25, 0x88, 0x04, 0x00, 0x01, 0x00, 0x00, 0x00, 0x44, 0x00, 0x00, 0x00,
-      0x00, 0x00, 0x00, 0x00,
-      0x41, 0x70, 0x70, 0x6C, 0x65, 0x00,
-      0x69, 0x50, 0x68, 0x6F, 0x6E, 0x65, 0x20, 0x31, 0x35, 0x20, 0x50, 0x72, 0x6F, 0x00,
-      0x04, 0x00,
-      0x01, 0x00, 0x02, 0x00, 0x02, 0x00, 0x00, 0x00, 0x4E, 0x00, 0x00, 0x00,
-      0x02, 0x00, 0x05, 0x00, 0x03, 0x00, 0x00, 0x00, 0x7A, 0x00, 0x00, 0x00,
-      0x03, 0x00, 0x02, 0x00, 0x02, 0x00, 0x00, 0x00, 0x57, 0x00, 0x00, 0x00,
-      0x04, 0x00, 0x05, 0x00, 0x03, 0x00, 0x00, 0x00, 0x92, 0x00, 0x00, 0x00,
-      0x00, 0x00, 0x00, 0x00,
-      40, 0, 0, 0, 1, 0, 0, 0,
-      44, 0, 0, 0, 1, 0, 0, 0,
-      0x6C, 0x15, 0, 0, 100, 0, 0, 0,
-      73, 0, 0, 0, 1, 0, 0, 0,
-      59, 0, 0, 0, 1, 0, 0, 0,
-      0x48, 0x03, 0, 0, 100, 0, 0, 0
-    ];
+    // Programmatically build a valid JPEG with correct TIFF/EXIF/GPS structures.
+    // All offsets are relative to tiffStart (byte 10 in the file).
+    const exifBuf = new ArrayBuffer(512);
+    const d = new DataView(exifBuf);
+    const u = new Uint8Array(exifBuf);
+    let p = 0;
+
+    const w16 = (v) => { d.setUint16(p, v, true); p += 2; };
+    const w32 = (v) => { d.setUint32(p, v, true); p += 4; };
+    const wEntry = (tag, type, count, valOrOff) => { w16(tag); w16(type); w32(count); w32(valOrOff); };
+    const wStr = (s) => { for (let i = 0; i < s.length; i++) { u[p++] = s.charCodeAt(i); } u[p++] = 0; };
+    const wRational = (num, den) => { w32(num); w32(den); };
+
+    // JPEG SOI + APP1 header
+    p = 0;
+    u[p++] = 0xFF; u[p++] = 0xD8; // SOI
+    u[p++] = 0xFF; u[p++] = 0xE1; // APP1
+    // APP1 length placeholder (fill later)
+    const app1LenPos = p; p += 2;
+    // "Exif\0\0"
+    u[p++] = 0x45; u[p++] = 0x78; u[p++] = 0x69; u[p++] = 0x66; u[p++] = 0; u[p++] = 0;
+
+    const tiffStart = p; // byte 10
+
+    // TIFF header (little-endian)
+    u[p++] = 0x49; u[p++] = 0x49; // 'II'
+    w16(42);    // TIFF magic
+    w32(8);     // offset to IFD0 (relative to tiffStart)
+
+    // === IFD0: 3 entries (Make, Model, GPSInfoIFDPointer) ===
+    // IFD0 starts at tiffStart + 8
+    const ifd0Start = p;
+    w16(3); // entry count
+
+    // Strings and GPS IFD data will go after the IFD0 entries + next-IFD pointer
+    // IFD0: 3 entries * 12 bytes = 36, plus 2 (count) + 4 (next IFD) = 42
+    const dataAreaStart = (ifd0Start - tiffStart) + 2 + 3 * 12 + 4; // offset 50
+
+    const makeStr = 'Apple\0';
+    const modelStr = 'iPhone 15 Pro\0';
+    const makeOff = dataAreaStart;
+    const modelOff = makeOff + makeStr.length;
+    const gpsIfdOff = modelOff + modelStr.length;
+
+    // Entry 1: Make (tag 0x010F, type ASCII=2)
+    wEntry(0x010F, 2, makeStr.length, makeOff);
+    // Entry 2: Model (tag 0x0110, type ASCII=2)
+    wEntry(0x0110, 2, modelStr.length, modelOff);
+    // Entry 3: GPSInfo pointer (tag 0x8825, type LONG=4, count 1, value = offset)
+    wEntry(0x8825, 4, 1, gpsIfdOff);
+
+    // Next IFD offset = 0 (no more IFDs)
+    w32(0);
+
+    // === Data area: strings ===
+    for (let i = 0; i < makeStr.length; i++) u[p++] = makeStr.charCodeAt(i);
+    for (let i = 0; i < modelStr.length; i++) u[p++] = modelStr.charCodeAt(i);
+
+    // === GPS IFD: 4 entries ===
+    // GPS coords: 40°44'54.36"N, 73°59'8.40"W (Times Square, NYC)
+    const gpsIfdStart = p;
+    w16(4); // 4 GPS entries
+
+    // GPS data area starts after GPS IFD entries + next-IFD pointer
+    // 4 entries * 12 = 48, plus 2 (count) + 4 (next IFD) = 54
+    const gpsDataStart = (gpsIfdStart - tiffStart) + 2 + 4 * 12 + 4;
+
+    const latDataOff = gpsDataStart;
+    const lonDataOff = latDataOff + 24; // 3 rationals = 24 bytes
+
+    // GPS entry 1: GPSLatitudeRef (tag 1, ASCII, count 2, value inline 'N\0')
+    wEntry(1, 2, 2, 0x004E); // 'N' + null, stored inline
+    // GPS entry 2: GPSLatitude (tag 2, RATIONAL=5, count 3, offset)
+    wEntry(2, 5, 3, latDataOff);
+    // GPS entry 3: GPSLongitudeRef (tag 3, ASCII, count 2, value inline 'W\0')
+    wEntry(3, 2, 2, 0x0057); // 'W' + null, stored inline
+    // GPS entry 4: GPSLongitude (tag 4, RATIONAL=5, count 3, offset)
+    wEntry(4, 5, 3, lonDataOff);
+
+    w32(0); // next IFD = 0
+
+    // Latitude rationals: 40/1, 44/1, 5436/100
+    wRational(40, 1); wRational(44, 1); wRational(5436, 100);
+    // Longitude rationals: 73/1, 59/1, 840/100
+    wRational(73, 1); wRational(59, 1); wRational(840, 100);
+
+    const exifEnd = p;
+
+    // Fill APP1 length (includes everything after the APP1 marker bytes, i.e. from length field to end)
+    const app1Len = exifEnd - (app1LenPos + 2) + 2; // +2 because length field itself is counted
+    d.setUint16(app1LenPos, app1Len, false); // big-endian per JPEG spec
+
+    // Build the full JPEG file
     const tail = extraTail ? new TextEncoder().encode(extraTail) : null;
-    const total = 4000 + (tail ? tail.length : 0);
-    const buffer = new Uint8Array(total);
-    buffer.set(parts, 0);
-    buffer[148] = 0xFF; buffer[149] = 0xDA; // SOS
-    for (let i = 150; i < 3998; i++) buffer[i] = Math.floor(Math.random() * 256);
-    buffer[3998] = 0xFF; buffer[3999] = 0xD9; // EOI
-    if (tail) buffer.set(tail, 4000);
-    return buffer.buffer;
+    const imageDataLen = 3000;
+    // SOS marker (2) + SOS header (3) + entropy data + EOI (2) + optional tail
+    const totalLen = exifEnd + 2 + 3 + imageDataLen + 2 + (tail ? tail.length : 0);
+    const jpeg = new Uint8Array(totalLen);
+    jpeg.set(u.subarray(0, exifEnd), 0);
+
+    let wp = exifEnd;
+    jpeg[wp++] = 0xFF; jpeg[wp++] = 0xDA; // SOS marker
+    jpeg[wp++] = 0x00; jpeg[wp++] = 0x03; // SOS length (includes length bytes + 1)
+    jpeg[wp++] = 0x00;                    // number of components = 0
+    // Entropy-coded data: avoid 0xFF to prevent premature marker detection
+    for (let i = 0; i < imageDataLen; i++) jpeg[wp++] = Math.floor(Math.random() * 254);
+    jpeg[wp++] = 0xFF; jpeg[wp++] = 0xD9; // EOI
+    if (tail) jpeg.set(tail, wp);
+
+    return jpeg.buffer;
   }
 
   function createMockMismatch() {
