@@ -3,82 +3,103 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Forensics — File Intelligence</title>
-  <meta name="description" content="Client-side file intelligence tool. Drop any file to reveal hidden metadata, GPS locations, true file types, entropy analysis, and more. Zero uploads. Everything runs locally.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <title>Forensics — see what your files are hiding</title>
+  <meta name="description" content="Drop any file to instantly reveal hidden EXIF metadata, GPS leaks, true file type, byte entropy, embedded strings, and steganography — all in your browser. Zero uploads, zero dependencies.">
+
+  <!-- Privacy is the product: lock the page down to its own origin. The only
+       permitted outbound request is optional OpenStreetMap map tiles. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+
+  <meta property="og:title" content="Forensics — see what your files are hiding">
+  <meta property="og:description" content="Client-side file intelligence. Hidden metadata, GPS leaks, entropy, and steganography — analyzed entirely in your browser.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#080A0F">
+
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-  <!-- ========= PARTICLES CANVAS BACKDROP ========= -->
-  <canvas id="particles-canvas"></canvas>
+  <!-- ========= PARTICLE BACKDROP ========= -->
+  <canvas id="particles-canvas" aria-hidden="true"></canvas>
 
-  <!-- ========= FORENSIC SCAN OVERLAY ========= -->
-  <div class="scanner-overlay" id="scanner-overlay" style="opacity: 0; display: none;">
+  <!-- ========= SCAN OVERLAY ========= -->
+  <div class="scanner-overlay" id="scanner-overlay" style="opacity:0;display:none;">
     <div class="scanner-content">
       <div class="scanner-spinner"></div>
-      <div class="scanner-title">Forensic Analysis</div>
-      <div class="scanner-status" id="scanner-status">Reading binary stream...</div>
-      <div class="scanner-bar">
-        <div class="scanner-bar-progress" id="scanner-progress"></div>
-      </div>
+      <div class="scanner-title">Forensic analysis</div>
+      <div class="scanner-status" id="scanner-status">Reading binary stream…</div>
+      <div class="scanner-bar"><div class="scanner-bar-progress" id="scanner-progress"></div></div>
     </div>
   </div>
 
   <!-- ========= HIDDEN FILE INPUT ========= -->
-  <input type="file" id="file-input" style="display: none;" aria-label="Choose a file to analyze">
+  <input type="file" id="file-input" style="display:none;" aria-label="Choose a file to analyze">
 
-  <!-- ========= DROP ZONE ========= -->
-  <div id="dropzone">
-    <div class="dropzone-brand">FORENSICS</div>
-    <div class="dropzone-frame" id="dropzone-frame" title="Click to browse files" tabindex="0" role="button" aria-label="Drop a file here or click to browse. Zero uploads. Everything runs in your browser.">
-      <svg class="dropzone-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Upload file icon">
+  <!-- ========= LANDING / DROP ZONE ========= -->
+  <main id="dropzone">
+    <header class="hero">
+      <div class="hero-brand">
+        <span class="hero-mark" aria-hidden="true"></span>
+        <span class="hero-wordmark">FORENSICS</span>
+      </div>
+      <h1 class="hero-title">See what your files are hiding.</h1>
+      <p class="hero-tagline">
+        Drop any file to expose its hidden EXIF metadata, GPS leaks, true type,
+        byte-level entropy and steganography — a full forensic report in milliseconds.
+      </p>
+    </header>
+
+    <div class="dropzone-frame" id="dropzone-frame" title="Click to browse files" tabindex="0" role="button"
+         aria-label="Drop a file here or click to browse. Nothing is uploaded — everything runs in your browser.">
+      <svg class="dropzone-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Upload">
         <path d="M24 4L24 32M24 32L16 24M24 32L32 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
         <path d="M8 36V40C8 42.2091 9.79086 44 12 44H36C38.2091 44 40 42.2091 40 40V36" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>
       </svg>
-      <p class="dropzone-text">Drop any file here or click to browse</p>
-      <p class="dropzone-subtext">Zero uploads. Everything runs completely in your browser.</p>
-    </div>
-    
-    <!-- DEMO SANDBOX BOX -->
-    <div class="demo-box">
-      <div class="demo-label">No files handy? Try a live demo:</div>
-      <div class="demo-buttons">
-        <button class="demo-btn" data-demo="photo" title="Load mock camera photo with Times Square GPS metadata">📸 Travel Photo (GPS Leak)</button>
-        <button class="demo-btn" data-demo="mismatch" title="Load high-entropy binary header renamed to text extension">⚠️ invoice.txt (Renamed EXE)</button>
-        <button class="demo-btn" data-demo="pdf" title="Load document with page outlines and author metadata">📄 Confidential.pdf (Author Leak)</button>
-      </div>
+      <p class="dropzone-text">Drop a file here or click to browse</p>
+      <p class="dropzone-subtext">Nothing is uploaded. Everything runs in your browser.</p>
     </div>
 
-    <div class="dropzone-footer">Client-side file intelligence</div>
-  </div>
+    <!-- INSTANT DEMOS -->
+    <section class="demo-box" aria-label="Try a sample file">
+      <div class="demo-label">No file handy? Try a live sample</div>
+      <div class="demo-buttons">
+        <button class="demo-btn" data-demo="photo"    title="Camera photo carrying GPS coordinates">📍 GPS photo</button>
+        <button class="demo-btn" data-demo="mismatch" title="High-entropy executable renamed to .txt">🎭 Disguised .exe</button>
+        <button class="demo-btn" data-demo="pdf"       title="PDF leaking author and tooling metadata">📄 Leaky PDF</button>
+        <button class="demo-btn" data-demo="stego"      title="Image with a payload hidden after the EOF marker">🕵️ Hidden payload</button>
+        <button class="demo-btn" data-demo="clean"      title="A clean image with no sensitive metadata">✅ Clean image</button>
+      </div>
+    </section>
+
+    <!-- TRUST STRIP -->
+    <ul class="trust-strip" aria-label="How it works">
+      <li><span class="trust-key">0</span> bytes uploaded</li>
+      <li><span class="trust-key">0</span> runtime dependencies</li>
+      <li><span class="trust-key">~200ms</span> drop to report</li>
+      <li>works offline</li>
+    </ul>
+  </main>
 
   <!-- ========= RESULTS ========= -->
-  <div id="results">
+  <section id="results">
     <div class="results-header">
-      <span class="results-brand">FORENSICS</span>
+      <span class="results-brand"><span class="hero-mark hero-mark-sm" aria-hidden="true"></span> FORENSICS</span>
       <div class="results-header-actions">
-        <button class="sound-toggle" id="sound-btn" title="Toggle Sound Feedback" aria-label="Sound is off. Click to enable sound.">🔇</button>
+        <button class="sound-toggle" id="sound-btn" title="Toggle sound feedback" aria-label="Sound is off. Click to enable sound.">🔇</button>
         <div class="mode-toggle" role="radiogroup" aria-label="Display mode">
           <button class="toggle-btn active" id="btn-expert" title="Detailed technical view" role="radio" aria-checked="true">Expert</button>
-          <button class="toggle-btn" id="btn-simple" title="Plain English simplified view" role="radio" aria-checked="false">Simple</button>
+          <button class="toggle-btn" id="btn-simple" title="Plain-English view" role="radio" aria-checked="false">Simple</button>
         </div>
-        <button class="results-reset" id="reset-btn">Analyze another file</button>
+        <button class="results-reset" id="reset-btn">Analyze another →</button>
       </div>
     </div>
     <div id="results-container" role="region" aria-live="polite" aria-label="Analysis results"></div>
-  </div>
+  </section>
 
-  <!-- ========= RE-DROP OVERLAY ========= -->
+  <!-- ========= RE-DROP HINT ========= -->
   <div class="redrop-area" id="redrop-area" style="display:none">
     <span>Drop another file anywhere to analyze</span>
   </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script src="js/app.js" defer></script>
 </body>
