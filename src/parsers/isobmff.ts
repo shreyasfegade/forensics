@@ -289,7 +289,7 @@ export async function parseIsobmff(src: Source, heif: boolean): Promise<IsoParse
   }
   const mk = meta.find(m => m.label === 'Make' || m.label === 'Manufacturer'), md = meta.find(m => m.label === 'Model');
   if ((mk || md) && !res.findings.some(f => f.id === 'device')) {
-    res.findings.push({ id: 'device', severity: 'caution', tag: 'DEVICE', fixable: true, title: 'Device fingerprint', detail: `Recorded on ${[mk?.value, md?.value].filter(Boolean).join(' ')}${meta.find(m => m.label === 'Software') ? `, software ${meta.find(m => m.label === 'Software')!.value}` : ''}.`, evidence: [mk?.range, md?.range].filter(Boolean) as Range[] });
+    res.findings.push({ id: 'device', severity: 'caution', tag: 'DEVICE', fixable: heif, title: 'Device fingerprint', detail: `Recorded on ${[mk?.value, md?.value].filter(Boolean).join(' ')}${meta.find(m => m.label === 'Software') ? `, software ${meta.find(m => m.label === 'Software')!.value}` : ''}.`, evidence: [mk?.range, md?.range].filter(Boolean) as Range[] });
   }
   const author = meta.filter(m => ['Artist', 'Author', 'Encoded by'].includes(m.label));
   if (author.length) res.findings.push({ id: 'iso-author', severity: 'caution', tag: 'AUTHOR', fixable: true, title: 'Names in metadata', detail: author.map(a => `${a.label}: ${a.value}`).join(' · '), evidence: author.map(a => a.range) });

@@ -57,3 +57,4 @@ npm-debug.log*
 dist/
 test-results/
 playwright-report/
+.cache/
