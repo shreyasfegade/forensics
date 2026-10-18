@@ -1,9 +1,8 @@
 /* Forensics: case-file design system.
-   Two themes share one structure. "Paper" is a manila case file in ink and
-   stamp red. "Lab" is the evidence room under a lightbox. Data is always
+   Two themes share one structure; dark is the default. "Paper" (light) is a manila case file in ink and
+   stamp red. "Lab" (dark) is the evidence room under a lightbox. Data is always
    monospace, findings are set in a serif, and UI chrome uses small sans labels. */
 
-:root,
 :root[data-theme="paper"] {
   --bg: #efeae0;
   --surface: #f8f5ee;
@@ -31,6 +30,7 @@
   color-scheme: light;
 }
 
+:root,
 :root[data-theme="lab"] {
   --bg: #141516;
   --surface: #1b1c1e;

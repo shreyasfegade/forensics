@@ -32,7 +32,7 @@ Every finding links to the byte range that proves it, shown in a virtualised, st
 
 Drop several files or a folder for **batch** mode: a worker pool examines them in parallel, and *Clean all* produces a ZIP of cleaned copies plus `summary.json` and `summary.html`. Files that can't be cleaned are listed in the summary, not silently copied.
 
-Cases export as JSON or print as a report (*Print / Save as PDF*). Personal values sit behind redaction bars until you reveal them, so a case can be screen-shared safely. The optional VirusTotal link sends only the SHA-256.
+The interface is dark by default, with a light "paper" theme one click away (the choice is remembered). Cases export as JSON or print as a report (*Print / Save as PDF*). Personal values sit behind redaction bars until you reveal them, so a case can be screen-shared safely. The optional VirusTotal link sends only the SHA-256.
 
 ## Evidence samples
 
@@ -63,7 +63,7 @@ src/analysis   streaming scanner (SHA-256, entropy, byte-plot, strings), stego, 
 src/sanitize   lossless cleaners + per-format plan
 src/worker     worker entry and message protocol
 src/ui         case file, hex viewer, plates, intake, batch
-public         index.html, CSS (paper + lab themes), icons, manifest
+public         index.html, CSS (dark default, light option), icons, manifest
 samples        evidence samples (also the test corpus)
 ```
 

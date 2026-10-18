@@ -92,7 +92,7 @@ const soundBtn = h('button', { class: 'seg', type: 'button', 'aria-pressed': Str
 document.getElementById('masthead')!.append(
   h('a', { class: 'brand', href: './', onclick: (e: Event) => { e.preventDefault(); if (!busy) home(); } }, h('span', { class: 'brand-mark', 'aria-hidden': 'true' }), 'Forensics'),
   h('div', { class: 'settings' },
-    toggle('Theme', [['paper', 'Paper'], ['lab', 'Lab']], () => prefs.theme, v => { prefs.theme = v as typeof prefs.theme; applyPrefs(prefs); savePrefs(prefs); }),
+    toggle('Theme', [['lab', 'Dark'], ['paper', 'Light']], () => prefs.theme, v => { prefs.theme = v as typeof prefs.theme; applyPrefs(prefs); savePrefs(prefs); }),
     toggle('Detail level', [['plain', 'Plain'], ['technical', 'Technical']], () => prefs.mode, v => { prefs.mode = v as typeof prefs.mode; applyPrefs(prefs); savePrefs(prefs); }),
     h('div', { class: 'seg-group' }, soundBtn)));
 

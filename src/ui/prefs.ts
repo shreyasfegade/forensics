@@ -9,12 +9,10 @@ export interface Prefs {
 
 const KEY = 'forensics.prefs';
 
-function systemTheme(): Prefs['theme'] {
-  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'lab' : 'paper';
-}
 
 export function loadPrefs(): Prefs {
-  const base: Prefs = { theme: systemTheme(), mode: 'technical', sound: false };
+  // Dark (lab) is the default; light (paper) is opt-in and remembered.
+  const base: Prefs = { theme: 'lab', mode: 'technical', sound: false };
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) return { ...base, ...JSON.parse(raw) };
