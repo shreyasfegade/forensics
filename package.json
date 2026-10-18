@@ -11,7 +11,9 @@
     "test": "vitest run",
     "test:e2e": "node scripts/build.mjs && playwright test",
     "samples": "node scripts/make-samples.mjs",
-    "check": "npm run typecheck && npm test"
+    "check": "npm run typecheck && npm test",
+    "preview": "node scripts/serve.mjs",
+    "icons": "node scripts/make-icons.mjs"
   },
   "keywords": [
     "forensics",
@@ -32,6 +34,7 @@
   "license": "MIT",
   "devDependencies": {
     "@playwright/test": "1.56.1",
+    "@types/node": "^22.20.5",
     "esbuild": "0.25.12",
     "typescript": "5.9.3",
     "vitest": "3.2.4"

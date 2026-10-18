@@ -300,7 +300,7 @@ export function tiffFindings(t: TiffResult, container: string): Finding[] {
     out.push({
       id: 'device', severity: 'caution', tag: 'DEVICE', fixable: true,
       title: 'Device fingerprint',
-      detail: `Recorded as taken on ${[s(make), s(model)].filter(Boolean).join(' ')}${s(t.get('Exif', 0xa434)) ? `, lens ${s(t.get('Exif', 0xa434))}` : ''}.`,
+      detail: `Recorded as taken on ${s(model).toLowerCase().startsWith(s(make).toLowerCase()) && s(make) ? s(model) : [s(make), s(model)].filter(Boolean).join(' ')}${s(t.get('Exif', 0xa434)) ? `, lens ${s(t.get('Exif', 0xa434))}` : ''}.`,
       evidence: [...r(make), ...r(model)],
     });
   }

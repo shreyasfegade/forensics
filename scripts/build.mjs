@@ -21,8 +21,10 @@ const common = {
   logLevel: 'info',
 };
 
+const version = Date.now().toString(36);
 const options = {
   ...common,
+  define: { __BUILD__: JSON.stringify(version) },
   entryPoints: { app: 'src/main.ts', worker: 'src/worker/index.ts', sw: 'src/sw.ts' },
   outdir,
 };

@@ -32,9 +32,9 @@ export function xy2d(n: number, x: number, y: number): number {
   return d;
 }
 
-/** Curve order so that 4^order cells cover `size` bytes, capped at 512×512. */
+/** Largest curve order whose 4^order cells don't exceed the byte count (so the plot is mostly filled), capped at 512×512. */
 export function orderFor(size: number): number {
   let order = 1;
-  while (order < 9 && Math.pow(4, order) < size) order++;
+  while (order < 9 && Math.pow(4, order + 1) <= size) order++;
   return order;
 }

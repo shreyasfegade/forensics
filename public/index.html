@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="paper" data-mode="technical">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Forensics: a privacy X-ray for every file</title>
+  <meta name="description" content="Open a case on any file: GPS, authors, edit history, hidden payloads, thumbnails that show what was cropped, LSB steganography. Then strip the leaks losslessly. Everything runs in your browser; nothing is uploaded.">
+  <!-- Privacy is the product: the page may only talk to its own origin. The single
+       exception is OpenStreetMap tiles, loaded only after an explicit click. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; worker-src 'self'; style-src 'self'; img-src 'self' data: blob: https://tile.openstreetmap.org; font-src 'self'; connect-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta name="theme-color" content="#efeae0">
+  <meta property="og:title" content="Forensics: a privacy X-ray for every file">
+  <meta property="og:description" content="See what your files give away, then remove it. Runs entirely in the browser.">
+  <meta property="og:type" content="website">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/app.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#app">Skip to content</a>
+  <header id="masthead" class="masthead"></header>
+  <main id="app" class="page" tabindex="-1">
+    <noscript><p>Forensics runs entirely in your browser and needs JavaScript to read files locally.</p></noscript>
+  </main>
+  <footer class="colophon">
+    <p>Forensics reads files locally in a Web Worker. No uploads, no accounts, no analytics. MIT licensed · <a href="https://github.com/shreyasfegade/forensics" rel="noopener">source</a></p>
+  </footer>
+</body>
+</html>

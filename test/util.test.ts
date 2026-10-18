@@ -42,7 +42,8 @@ describe('hilbert', () => {
   });
   it('picks a curve order that covers the file', () => {
     expect(orderFor(1)).toBe(1);
-    expect(Math.pow(4, orderFor(5000))).toBeGreaterThanOrEqual(5000);
+    expect(Math.pow(4, orderFor(5000))).toBeLessThanOrEqual(5000);
+    expect(Math.pow(4, orderFor(5000) + 1)).toBeGreaterThan(5000);
     expect(orderFor(1e9)).toBe(9);
   });
 });

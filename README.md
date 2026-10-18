@@ -1,144 +1,80 @@
 # Forensics
 
-**See what your files are hiding.** Drop any file to instantly expose hidden EXIF metadata, GPS leaks, true file type, byte-level entropy, embedded strings, and steganography — a full forensic report in milliseconds. Zero uploads, zero dependencies, everything runs in your browser.
+**A privacy X-ray for every file, and the fix.** Drop a photo, video, PDF, Office document, archive or executable. Forensics opens a case on it: where it was made, who touched it, what earlier versions it still carries, and what is hidden inside. Then it strips the leaks without re-encoding a pixel. Everything runs in your browser, in a Web Worker. Nothing is uploaded.
 
-![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
-![Dependencies](https://img.shields.io/badge/Dependencies-0-30D158?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+![Case file for a cropped photo whose embedded thumbnail still shows the original frame](screenshots/case-paper.png)
 
-![Forensics Hero](screenshots/hero.png)
+## What it finds
 
----
-
-## Why
-
-Every file carries silent data. A vacation photo embeds the GPS coordinates of your house, a PDF leaks the author's full name and OS version, and a renamed executable slips past anyone who trusts the file extension. Inspecting this usually means uploading to an online checker (compromising the very privacy you're trying to protect) or installing heavyweight CLI tools like ExifTool.
-
-**Forensics** does it in the browser. Nothing is uploaded. Nothing is installed. Drop a file and get a full forensic breakdown before you can blink.
-
----
-
-## Features
-
-| Capability | What it does |
+| Leak | How it's found |
 |---|---|
-| **Hand-rolled EXIF/TIFF parser** | Walks JPEG APP1 and PNG eXIf segments — decodes IFD directories, endianness, GPS rational pairs, camera make/model, lens, software, and timestamps. No library involved. |
-| **GPS location mapping** | Extracts embedded coordinates and plots them on a hand-rolled canvas slippy map with OSM tiles, dark-mode filter, animated crosshair overlay, pulsing range rings, and radar sweep. Privacy-first: tiles load only after explicit opt-in. |
-| **Magic-byte file identification** | Matches the first 4–16 bytes against 30+ known signatures. Flags extension mismatches — catches a `.txt` that's actually an `.exe`. |
-| **Shannon entropy analysis** | Computes bits-per-byte across the full file and renders a 256-bar canvas frequency chart. Near 0 = structured text, near 8 = encrypted or compressed. |
-| **Steganography detection** | Scans past the official EOF marker (JPEG `FFD9`, PNG `IEND`) to find appended hidden payloads. |
-| **PDF metadata extraction** | Pulls author, title, creator, producer, dates, page count, and flags embedded JavaScript. |
-| **ASCII strings extractor** | Scans raw bytes for printable runs and flags URLs, email addresses, file paths, and credential-like patterns. |
-| **Risk verdict engine** | Synthesizes all findings into a Clear / Caution / Exposed verdict with specific, plain-English explanations. |
-| **JSON report export** | One-click download of the full structured forensic report, or copy to clipboard. |
-| **Image preview** | Canvas-rendered thumbnail with resolution and color-depth stats for supported image formats. |
-| **Sound feedback** | Web Audio API chime synthesis for scan progress, warnings, and completion. |
-| **5 instant demos** | GPS photo, disguised executable, leaky PDF, hidden payload, and clean image — try everything without a file on hand. |
+| **Thumbnail shows what was cropped** | The EXIF IFD1 preview is decoded and compared with the photo (aspect ratio + 64-bit difference hash). Editors often leave it untouched. |
+| **GPS in photos** | Hand-written TIFF/EXIF engine, used for JPEG (APP1), PNG (eXIf), HEIC/HEIF (EXIF item via `iinf`/`iloc`), WebP, TIFF and DNG. XMP and IPTC too. |
+| **GPS in phone videos** | ISO-BMFF box walker: QuickTime `©xyz`, Apple/Android `mdta` keys (`com.apple.quicktime.location.ISO6709`), `mvhd` recording time. |
+| **Deleted text in Word files** | DOCX/XLSX/PPTX: authors, last-modified-by, company, template paths, comments, tracked changes (`w:delText` is recovered word for word), hidden text, speaker notes, hidden sheets, macros. |
+| **Earlier PDF versions** | Incremental updates are split at each `%%EOF`; every earlier version can be downloaded intact. Info per revision (latest wins), XMP, JavaScript/Launch/OpenAction, invisible text (`3 Tr`), compressed object streams. |
+| **Disguised executables** | Magic bytes vs extension. PE headers: build time, packed sections (per-section entropy), Authenticode presence, and the debug PDB path, which often contains a Windows username. |
+| **Hidden payloads** | Data after JPEG EOI / PNG IEND / BMP size, ZIP slip paths, credential-like strings (ASCII and UTF-16) anywhere in the bytes. |
+| **LSB steganography** | Chi-square attack (Westfeld–Pfitzmann) and RS analysis (Fridrich et al.) on exact pixels from a built-in PNG/BMP decoder, plus a bit-plane viewer. Reported as "consistent with", never as proof. |
+| **Tampering hints** | Error level analysis heatmap and a JPEG quantisation-table fingerprint (IJG quality estimate, standard vs custom tables). |
 
----
+Every finding links to the byte range that proves it, shown in a virtualised, structure-aware hex viewer (segment/chunk/box/IFD tree, inspector, go-to-offset). A Hilbert-curve byte-plot and an entropy-over-offset graph show the whole file at once.
 
-## Architecture
+## The fix
 
-```
-┌─────────────────┐         ┌─────────────────┐         ┌─────────────────┐
-│   FILE INPUT    │         │    ANALYSIS      │         │   RENDERING     │
-│                 │         │                  │         │                 │
-│ Drag & Drop     │────────►│ Magic-byte ID    │────────►│ Verdict card    │
-│ File picker     │ Array   │ EXIF/TIFF parser │ parsed  │ Stats grid      │
-│ Demo generators │ Buffer  │ PDF metadata     │  data   │ Canvas entropy  │
-│                 │         │ Shannon H(X)     │         │ Canvas map      │
-│                 │         │ EOF stego scan   │         │ Strings table   │
-│                 │         │ String extractor  │         │ JSON export     │
-│                 │         │ Verdict engine   │         │ Image preview   │
-└─────────────────┘         └─────────────────┘         └─────────────────┘
+**Clean a copy** removes metadata without re-encoding and then re-examines the result, so you see a before/after table:
 
-                    ⬤ Entirely client-side — zero uploads, zero servers
-```
+- **JPEG**: drops EXIF/XMP/IPTC/comments/vendor APP segments and trailing data; keeps scan data byte-identical, ICC profile, and orientation (as a one-tag EXIF block).
+- **PNG**: drops text, eXIf, tIME and private chunks; keeps pixels and colour chunks. **WebP**: drops EXIF/XMP chunks and fixes the VP8X flags.
+- **DOCX/XLSX/PPTX**: blanks document properties and the saved preview; every other part is copied with its original compressed bytes. Comments and tracked changes are content, so they're **reported, not removed**.
+- **PDF**: blanks Info values and XMP in place with same-length padding (xref offsets stay valid) across all revisions. Metadata inside compressed object streams is reported as not cleaned.
+- **MP4/MOV**: location atoms become `free` padding of the same size. **HEIC**: the EXIF item is zeroed in place. **TIFF/DNG**: sensitive tag values are blanked in place.
 
-### Data flow
+Drop several files or a folder for **batch** mode: a worker pool examines them in parallel, and *Clean all* produces a ZIP of cleaned copies plus `summary.json` and `summary.html`. Files that can't be cleaned are listed in the summary, not silently copied.
 
-```
-File dropped / demo clicked
-  ↓
-ArrayBuffer loaded ────────────── FileReader API
-  ↓
-True type identified ──────────── magic-byte comparison (30+ signatures)
-  ↓
-EXIF/TIFF parsed ──────────────── binary IFD traversal, GPS rational decode
-  ↓
-PDF metadata extracted ────────── text-based /Info dictionary parser
-  ↓
-Entropy computed ──────────────── 256-bin byte frequency → Shannon formula
-  ↓
-Strings extracted ─────────────── printable ASCII scan → URL/email/cred flagging
-  ↓
-Steganography checked ─────────── EOF marker offset vs total file size
-  ↓
-Verdict synthesized ───────────── all findings → risk level + explanations
-  ↓
-Report rendered ───────────────── cards, charts, map, export
+Cases export as JSON or print as a report (*Print / Save as PDF*). Personal values sit behind redaction bars until you reveal them, so a case can be screen-shared safely. The optional VirusTotal link sends only the SHA-256.
 
-Total: ~200ms from drop to full report
-```
+## Evidence samples
 
-The EXIF parser determines byte order from the TIFF header (`II` or `MM`), walks IFD entry chains, and maps tag IDs to human-readable fields. GPS coordinates are decoded from rational number triples (degrees/minutes/seconds) into decimal degrees. Entropy uses Shannon's formula — values near 0 indicate structured data, values near 8 indicate encrypted or compressed content.
+Nine synthetic samples, one per headline leak, are built by `npm run samples` (real JPEGs rendered in headless Chromium, metadata spliced in with the project's own writers). Open one at `/#sample=harbor_cropped.jpg`. The phone-video sample is a metadata-only container with no frames. The people, places and numbers in the samples are invented.
 
----
+## Privacy model
 
-## Tech stack
+- The page's CSP only allows its own origin. The one exception is OpenStreetMap tiles, fetched only after you click *Show on map*.
+- Files are passed to the worker as `Blob`s and read with `Blob.slice`, so large files never sit on the main thread.
+- After the first visit a service worker caches the app and samples, so it works offline.
 
-**Zero runtime dependencies.** Everything is hand-rolled vanilla JavaScript:
-
-- Binary parsing via `ArrayBuffer` + `DataView`
-- Canvas rendering for entropy chart, image preview, and slippy map
-- CSS-only card entrance animations (no animation library)
-- Web Audio API for synthesized sound feedback
-- System font stack (no external font loading)
-- CSP headers lock the page to its own origin (only exception: optional OSM map tiles)
-
----
-
-## Quick start
+## Develop
 
 ```bash
-git clone https://github.com/shreyasfegade/forensics.git
-cd forensics
-npx serve
+npm install
+npm run dev          # esbuild watch + serve on :3000
+npm run check        # typecheck + unit tests
+npm run test:e2e     # build, then Playwright against dist/
+npm run build        # dist/ (zero runtime dependencies)
 ```
 
-Open [http://localhost:3000](http://localhost:3000). That's it — no install, no build step.
-
-Or deploy to Vercel: import the repo and it works with zero configuration.
-
----
-
-## Project structure
+TypeScript, bundled by esbuild into `dist/app.js`, `dist/worker.js` and `dist/sw.js`. Dev dependencies only: TypeScript, esbuild, Vitest, Playwright. **84 tests**: 73 Vitest unit tests (parsers, sanitizers, steganalysis, the sample corpus) and 11 Playwright end-to-end tests (thumbnail comparison, redaction, byte jumps, cleaning, bit planes, ELA, batch ZIP, a 64 MB file without blocking the UI, mobile layout, no off-origin requests).
 
 ```
-forensics/
-├── css/
-│   └── styles.css      # Layout, glassmorphism, card animations, responsive
-├── js/
-│   └── app.js          # All parsers, map, chart, tween engine, UI logic
-├── index.html          # Markup — hero, drop zone, demos, results shell
-├── vercel.json         # Zero-config deploy + CSP/security headers
-├── package.json        # Metadata only — no runtime dependencies
-├── screenshots/        # Portfolio screenshots
-└── LICENSE             # MIT
+src/core       types, magic bytes, analysis pipeline, verdict
+src/parsers    tiff jpeg png pdf zip ooxml isobmff pe id3 riff bmp xmp
+src/analysis   streaming scanner (SHA-256, entropy, byte-plot, strings), stego, ELA, thumbnail, DQT
+src/sanitize   lossless cleaners + per-format plan
+src/worker     worker entry and message protocol
+src/ui         case file, hex viewer, plates, intake, batch
+public         index.html, CSS (paper + lab themes), icons, manifest
+samples        evidence samples (also the test corpus)
 ```
 
----
+## Limits
 
-## Limitations
-
-- **Browser memory**: very large files (100MB+) may cause tab memory pressure since the full `ArrayBuffer` lives in RAM.
-- **EXIF coverage**: optimized for JPEG and PNG. HEIF/HEIC and TIFF-container RAW formats are not yet supported.
-- **No persistence**: analysis is ephemeral — results are lost on refresh (by design, for privacy).
-
----
+- Authenticode signatures are detected, not verified (no certificate chain in the browser).
+- Structure parsing holds files up to 96 MB in worker memory; larger files are parsed from their first 32 MB (PDFs: head and tail) while hash, entropy and byte-plot still cover every byte. Strings come from the first 16 MB and last 1 MB.
+- Steganalysis needs 8-bit truecolour or greyscale PNG/BMP, non-interlaced, up to 40 megapixels.
+- ELA and steganalysis are statistical hints. Neither proves tampering or hidden data.
+- HEIC cleaning zeroes the EXIF item. It does not rebuild the item table.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
