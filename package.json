@@ -1,6 +1,6 @@
 {
   "name": "forensics",
-  "version": "3.0.0-dev",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
   "description": "Client-side file forensics: a privacy X-ray for every file, and the fix. Parsers run in a Web Worker; nothing is uploaded. Zero runtime dependencies.",
@@ -38,5 +38,10 @@
     "esbuild": "0.25.12",
     "typescript": "5.9.3",
     "vitest": "3.2.4"
+  },
+  "homepage": "https://forensics-bay.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shreyasfegade/forensics.git"
   }
 }

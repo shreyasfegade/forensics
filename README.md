@@ -2,7 +2,9 @@
 
 **A privacy X-ray for every file, and the fix.** Drop a photo, video, PDF, Office document, archive or executable. Forensics opens a case on it: where it was made, who touched it, what earlier versions it still carries, and what is hidden inside. Then it strips the leaks without re-encoding a pixel. Everything runs in your browser, in a Web Worker. Nothing is uploaded.
 
-![Case file for a cropped photo whose embedded thumbnail still shows the original frame](screenshots/case-paper.png)
+**Live: [forensics-bay.vercel.app](https://forensics-bay.vercel.app)** · try a sample: [cropped photo](https://forensics-bay.vercel.app/#sample=harbor_cropped.jpg) · [offer letter with tracked changes](https://forensics-bay.vercel.app/#sample=offer_letter_final.docx) · [hidden message in a PNG](https://forensics-bay.vercel.app/#sample=mountains.png)
+
+![Case file for a cropped photo whose embedded thumbnail still shows the original frame](screenshots/case-lab.png)
 
 ## What it finds
 
