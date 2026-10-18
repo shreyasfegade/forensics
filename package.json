@@ -1,27 +1,39 @@
 {
   "name": "forensics",
-  "version": "2.0.0",
+  "version": "3.0.0-dev",
   "private": true,
-  "description": "Client-side file forensics — hand-rolled EXIF/TIFF parsing, Shannon-entropy analysis, and steganography detection that runs entirely in the browser. Zero uploads, zero dependencies.",
-  "main": "index.html",
+  "type": "module",
+  "description": "Client-side file forensics: a privacy X-ray for every file, and the fix. Parsers run in a Web Worker; nothing is uploaded. Zero runtime dependencies.",
   "scripts": {
-    "dev": "npx --yes serve@latest -l 3000 .",
-    "start": "npx --yes serve@latest -l 3000 ."
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/build.mjs --serve",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "node scripts/build.mjs && playwright test",
+    "samples": "node scripts/make-samples.mjs",
+    "check": "npm run typecheck && npm test"
   },
   "keywords": [
     "forensics",
     "metadata",
     "exif",
-    "tiff-parser",
-    "pdf-metadata",
-    "shannon-entropy",
-    "steganography",
-    "canvas",
-    "client-side",
+    "heic",
+    "mp4",
+    "docx",
+    "pdf",
+    "steganalysis",
+    "error-level-analysis",
+    "hex-viewer",
     "privacy",
-    "vanilla-js",
+    "client-side",
     "zero-dependencies"
   ],
   "author": "Shreyas Fegade",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "esbuild": "0.25.12",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  }
 }

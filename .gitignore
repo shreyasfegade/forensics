@@ -52,3 +52,8 @@ AGENTS.md
 # Logs
 *.log
 npm-debug.log*
+
+# Build output
+dist/
+test-results/
+playwright-report/
